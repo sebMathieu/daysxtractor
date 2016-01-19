@@ -7,7 +7,7 @@ import math,copy
 class Bins:
 	## Create bins from data.
 	# @param data Data with the time series.
-	# @param binPerTimeSeries Default number of bins per time series.
+	# @param binsPerTimeSeries Default number of bins per time series.
 	def __init__(self, data=None, binsPerTimeSeries=10):
 		self.labels = None
 		self.days = None
@@ -21,7 +21,9 @@ class Bins:
 		if data is not None:
 			self._createBins(data, binsPerTimeSeries)
 
-	# Create bins from representative days.
+	## Create bins from representative days.
+	# @param bins Bins of the initial time series.
+	# @param representativeDays Dictionary with the selected representative days as keys and their weights as values.
 	def createFromRepresentativeDays(self, bins, representativeDays):
 		self.labels = bins.labels
 		self.days = {}
@@ -110,6 +112,7 @@ class Bins:
 
 	## Create bins discretizing the time series.
 	# @param data Data with the time series.
+	# @param binsPerTimeSeries Number of bins per time series.
 	def _createBins(self, data, binsPerTimeSeries):
 		self.labels = data.labels
 

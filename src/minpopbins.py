@@ -8,7 +8,7 @@ from .bins import Bins
 class MinPopBins(Bins):
 	## Create bins from data.
 	# @param data Data with the time series.
-	# @param binPerTimeSeries Default number of bins per time series.
+	# @param binsPerTimeSeries Default number of bins per time series.
 	# @param minPop Minimum relative population of a bin in [0,1]. A value of 0 will still merge the 0 population bins.
 	def __init__(self, data=None, binsPerTimeSeries=10, minPop=0):
 		self.minPop = minPop
