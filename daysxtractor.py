@@ -12,7 +12,7 @@ from src.minpopbins import MinPopBins as Bins
 # @param argv Program parameters.
 def main(argv):
 	# Default parameters
-	numberRepresentativeDays = 24
+	numberRepresentativeDays = 12
 	timelimit = 60
 	solver = None
 	verbose = False

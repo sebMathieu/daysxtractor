@@ -18,7 +18,7 @@ Following columns are the different parameters characterizing the parameters.
 The first two lines compose the header with the title of each column on the first and the units in the second.
 
 **Options:**
-- `-n 24`		Number of representative days to select.
+- `-n 12`		Number of representative days to select.
 - `-s name`		Use an optimization solver (cplex, gurobi, cbc, asl:scip, etc.).
 - `-t 60`		Set the time limit to 60 seconds.
 - `-v`			Verbose mode.
