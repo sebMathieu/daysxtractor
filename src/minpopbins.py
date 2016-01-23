@@ -5,6 +5,7 @@ import time
 
 from .bins import Bins
 
+## Create bins for time series with a minimum population.
 class MinPopBins(Bins):
 	## Create bins from data.
 	# @param data Data with the time series.
