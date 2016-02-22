@@ -5,6 +5,8 @@ import time, datetime
 import xlrd # Read excel files. Install with "pip install xlrd"
 from .data import *
 
+
+
 ## Parse an excel file with time series.
 # The first column of the file is the date, the second corresponds to the quarter (which may be empty).
 # Following columns are the different parameters characterizing the parameters.
@@ -82,3 +84,41 @@ def parseFile(filePath):
 
     return data
 
+## Parse an excel file with representative days.
+# The first row of the file is a header.
+# The next lines contains the days in the first column and their weights in the second.
+# @param filePath Path to the excel file.
+# @return Dictionary with the select days and their weights.
+def parseRepresentativeDays(filePath):
+    days = {}
+
+    # Open the file
+    workbook = xlrd.open_workbook(filePath, on_demand=True)
+    sheet = workbook.sheet_by_index(0)
+
+    # For each row
+    takeDayRaw=False
+    for r in range(1, sheet.nrows):
+        # Get row
+        row = sheet.row_values(r, 0, sheet.ncols)
+
+        # Parse date
+        day = row[0]
+
+        # Cast it as a day
+        try:
+            if takeDayRaw or int(day) < 2000:  # The number is probably not a date
+                takeDayRaw = True
+            else:
+                dayTuple = xlrd.xldate_as_tuple(day, workbook.datemode)  # Gregorian (year, month, day, hour, minute, nearest_second)
+                day = datetime.datetime(dayTuple[0], dayTuple[1], dayTuple[2], dayTuple[3], dayTuple[4], dayTuple[5])
+        except Exception:
+            takeDayRaw = True
+
+        # Get the weight
+        weight = float(row[1])
+
+        # Assign to dictionary
+        days[day] = weight
+
+    return days

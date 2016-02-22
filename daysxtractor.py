@@ -16,7 +16,8 @@ def main(argv):
     timelimit = 60
     solver = None
     verbose = False
-    plot=False
+    plot = False
+    check = None # Path of the file containing the representative days to check
 
     # Parse parameters
     if len(argv) < 1:
@@ -25,7 +26,7 @@ def main(argv):
     filePath = argv[-1]
 
     try:
-        opts, args = getopt.getopt(argv[0:-1],'n:s:t:vp',['number=','solver=','timelimit=','verbose','plot'])
+        opts, args = getopt.getopt(argv[0:-1], 'n:s:t:vpc:', ['number=', 'solver=', 'timelimit=', 'verbose', 'plot', 'check='])
     except getopt.GetoptError as err:
         displayHelp()
         sys.exit(2)
@@ -46,6 +47,8 @@ def main(argv):
             verbose = True
         elif opt in ('-p', '--plot'):
             plot = True
+        elif opt in ('-c', '--check'):
+            check = arg
 
     # Read the data
     data = excelReader.parseFile(filePath)
@@ -60,7 +63,11 @@ def main(argv):
 
     # Select days
     tic = time.time()
-    representativeDays = daySelector.selectDays(data)
+    representativeDays = None
+    if check is None:
+        representativeDays = daySelector.selectDays(data)
+    else:
+        representativeDays = excelReader.parseRepresentativeDays(check)
     toc = time.time()
 
     # Print result
@@ -107,6 +114,9 @@ def displayHelp():
     text += '    -t 60       --timelimit 60    Set the time limit to 60 seconds.\n'
     text += '    -v          --verbose         Verbose mode.\n'
     text += '    -p          --plot            Plot.\n'
+    text += '    -c days.xls --check days.xls  Check selected representative days. The first row of the file is a\n'
+    text += '                                  header. The next lines contains the days in the first column and \n'
+    text += '                                  their weights in the second.\n'
 
     print(text)
 

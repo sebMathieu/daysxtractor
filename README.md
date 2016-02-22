@@ -23,7 +23,7 @@ The first two lines compose the header with the title of each column on the firs
 - `-t 60`		Set the time limit to 60 seconds.
 - `-v`			Verbose mode.
 - `-p`			Plot.
-
+- `-c days.xls` Check selected representative days. The first row of the file is a header. The next lines contains the days in the first column and their weights in the second.
 
 Documentation can be built using doxygen with the following command.
 > doxygen doxyfile
