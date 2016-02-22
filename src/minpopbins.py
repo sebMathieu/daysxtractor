@@ -13,8 +13,8 @@ class MinPopBins(Bins):
     # @param binsPerTimeSeries Default number of bins per time series.
     # @param minPop Minimum relative population of a bin in [0,1]. A value of 0 will still merge the 0 population bins.
     def __init__(self, data=None, binsPerTimeSeries=10, minPop=0):
-        Bins.__init__(self, data, binsPerTimeSeries)
         self.minPop = minPop
+        Bins.__init__(self, data, binsPerTimeSeries)
 
     def _createBins(self, data, binsPerTimeSeries):
         self.labels = data.labels
@@ -39,8 +39,8 @@ class MinPopBins(Bins):
             minOccurences = self.minPop * self.labels[p].datapoints
             b = 0
             while b < B:
-                if self.binSize[p][b] == 0 or (
-                        self.binSize[p][b] < minOccurences and self.binSize[p][b + 1] < minOccurences):
+                if self.binSize[p][b] == 0 or (self.binSize[p][b] < minOccurences
+                                               and self.binSize[p][b + 1] < minOccurences):
                     # Merge with the previous
                     self.binSize[p][b + 1] += self.binSize[p][b]
                     self.binStart[p][b + 1] = self.binStart[p][b]
