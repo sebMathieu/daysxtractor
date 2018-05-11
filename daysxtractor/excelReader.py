@@ -2,9 +2,8 @@
 #@author Sebastien MATHIEU
 
 import time, datetime
-import xlrd # Read excel files. Install with "pip install xlrd"
+import xlrd  # Read excel files. Install with "pip install xlrd"
 from .data import *
-
 
 
 ## Parse an excel file with time series.

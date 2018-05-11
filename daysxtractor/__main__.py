@@ -1,12 +1,13 @@
 ##@package daysxtractor
-#@author Sebastien MATHIEU
+# @author Sebastien MATHIEU
 
-import sys, time, getopt, datetime
+import sys, time, getopt, datetime, os
 
-from src.mipdaysselector import MIPDaysSelector
-import src.excelReader as excelReader
-from src.samplingdaysselector import SamplingDaysSelector
-from src.minpopbins import MinPopBins as Bins
+from daysxtractor.mipdaysselector import MIPDaysSelector
+import daysxtractor.excelReader as excelReader
+from daysxtractor import SamplingDaysSelector
+from daysxtractor import MinPopBins as Bins
+
 
 ## Entry point of the program.
 # @param argv Program parameters.
@@ -17,7 +18,8 @@ def main(argv):
     solver = None
     verbose = False
     plot = False
-    check = None # Path of the file containing the representative days to check
+    check = None  # Path of the file containing the representative days to check
+    outputFolder = None
 
     # Parse parameters
     if len(argv) < 1:
@@ -26,7 +28,8 @@ def main(argv):
     filePath = argv[-1]
 
     try:
-        opts, args = getopt.getopt(argv[0:-1], 'n:s:t:vpc:', ['number=', 'solver=', 'timelimit=', 'verbose', 'plot', 'check='])
+        opts, args = getopt.getopt(argv[0:-1], 'n:s:t:vpc:o:',
+                                   ['number=', 'solver=', 'timelimit=', 'verbose', 'plot', 'check=', 'output='])
     except getopt.GetoptError as err:
         displayHelp()
         sys.exit(2)
@@ -49,6 +52,13 @@ def main(argv):
             plot = True
         elif opt in ('-c', '--check'):
             check = arg
+        elif opt in ('-o', '--output'):
+            outputFolder = arg
+
+    if outputFolder is None:
+        outputFolder = "."
+    if outputFolder[-1] not in ['/', '\\']:
+        outputFolder += '/'
 
     # Read the data
     data = excelReader.parseFile(filePath)
@@ -56,10 +66,13 @@ def main(argv):
     # Instantiate the day selector
     daySelector = None
     if solver is None:
-        print("WARNING: No optimization solver set. Try using an optimization solver (e.g. cplex, gurobi, cbc, etc.) for better results.")
-        daySelector = SamplingDaysSelector(numberRepresentativeDays=numberRepresentativeDays, timelimit=timelimit, verbose=verbose)
+        print(
+            "WARNING: No optimization solver set. Try using an optimization solver (e.g. cplex, gurobi, cbc, etc.) for better results.")
+        daySelector = SamplingDaysSelector(numberRepresentativeDays=numberRepresentativeDays, timelimit=timelimit,
+                                           verbose=verbose)
     else:
-        daySelector = MIPDaysSelector(numberRepresentativeDays=numberRepresentativeDays, timelimit=timelimit, solverName=solver, verbose=verbose)
+        daySelector = MIPDaysSelector(numberRepresentativeDays=numberRepresentativeDays, timelimit=timelimit,
+                                      solverName=solver, verbose=verbose)
 
     # Select days
     tic = time.time()
@@ -71,9 +84,10 @@ def main(argv):
     toc = time.time()
 
     # Print result
-    print("\nRepresentative days and weights found after %.2fs:" % (toc-tic))
+    print("\nRepresentative days and weights found after %.2fs:" % (toc - tic))
     for day in sorted(representativeDays.keys()):
-        print("\t%.2f\t-\t%s" % (representativeDays[day], day.strftime("%d %B %Y") if isinstance(day, datetime.datetime) else day))
+        print("\t%.2f\t-\t%s" % (
+        representativeDays[day], day.strftime("%d %B %Y") if isinstance(day, datetime.datetime) else day))
 
     bins = Bins(data, daySelector.binsPerTimeSeries)
     representativeBins = Bins()
@@ -81,28 +95,30 @@ def main(argv):
 
     # Plot
     if plot:
+        os.makedirs(outputFolder, exist_ok=True)
         for label in data.labels:
-            data.plotRepresentativeTimeseries(label, representativeDays)
+            data.plotRepresentativeTimeseries(label, representativeDays, pathPrefix=outputFolder)
 
     # Error measures
     print("\nError measures:")
     print("\t- Bins population:")
     for p in bins.labelRanges():
         populationMin, populationMax = bins.population(p)
-        print("\t\t%s: min=%.2f%%, max=%.2f%%" % (bins.labels[p].name, populationMin*100.0, populationMax*100.0))
+        print("\t\t%s: min=%.2f%%, max=%.2f%%" % (bins.labels[p].name, populationMin * 100.0, populationMax * 100.0))
 
     print("\t- Normalized root-mean-square error:")
     for p in bins.labelRanges():
-        print("\t\t%s: %.2f%%" % (bins.labels[p].name, bins.nrmsError(p, representativeBins)*100.0))
+        print("\t\t%s: %.2f%%" % (bins.labels[p].name, bins.nrmsError(p, representativeBins) * 100.0))
 
     print("\t- Relative area error:")
     for p in bins.labelRanges():
-        print("\t\t%s: %.2f%%" % (bins.labels[p].name, bins.relativeAreaError(p, representativeBins)*100.0))
+        print("\t\t%s: %.2f%%" % (bins.labels[p].name, bins.relativeAreaError(p, representativeBins) * 100.0))
+
 
 ## Display help of the program.
 def displayHelp():
     text = ''
-    text += 'Usage :\n\tpython daysxtractor.py [options] data.xlsx\n'
+    text += 'Usage :\n\tpython __main__.py [options] data.xlsx\n'
     text += 'Extract a given number of representative days of a set of time series.\n'
     text += '\nThe first column of the excel file is the date, the second corresponds to the quarter (which may be empty).\n'
     text += 'Following columns are the different parameters characterizing the parameters.\n'
@@ -117,8 +133,10 @@ def displayHelp():
     text += '    -c days.xls --check days.xls  Check selected representative days. The first row of the file is a\n'
     text += '                                  header. The next lines contains the days in the first column and \n'
     text += '                                  their weights in the second.\n'
+    text += '   -o folder    --output folder   Output the plots in a specific folder.\n'
 
     print(text)
+
 
 # Starting point from python #
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 # @package bins
 # @author Sebastien MATHIEU
 
-import math,copy
+import math, copy
 
 ## Create bins for time series.
 class Bins:

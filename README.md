@@ -3,7 +3,7 @@ DaysXtractor
 Extract a given number of representative days of a set of time series.
 
 **Quick usage:**
-> python3 daysxtractor.py -t 60 data.xlsx
+> python3 -m daysxtrator -t 60 data/data.xlsx
 
 Motivation
 ----------
@@ -11,7 +11,7 @@ Maybe you are confronted to a large amount of data representative of a year, i.e
 
 Usage
 --------
-> python daysxtractor.py [options] data.xlsx
+> python -m daysxtrator [options] data.xlsx
 
 The first column of the excel file is the date, the second corresponds to the quarter (which may be empty).
 Following columns are the different parameters characterizing the parameters.
@@ -24,9 +24,10 @@ The first two lines compose the header with the title of each column on the firs
 - `-v`			Verbose mode.
 - `-p`			Plot.
 - `-c days.xls` Check selected representative days. The first row of the file is a header. The next lines contains the days in the first column and their weights in the second.
+- `-o folder`   Output the plots in a specific folder.
 
 Documentation can be built using doxygen with the following command.
-> doxygen doxyfile
+> doxygen doc/doxyfile
 
 Contributions
 -------------

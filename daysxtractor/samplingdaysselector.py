@@ -1,11 +1,13 @@
 ##@package samplingdaysselector
-#@author Sebastien MATHIEU
+# @author Sebastien MATHIEU
+
 from __future__ import division
 
 import math, time, random
 
 from .daysselector import DaysSelector
 from .minpopbins import MinPopBins as Bins
+
 
 ## Select representative days by random sampling.
 class SamplingDaysSelector(DaysSelector):
@@ -32,7 +34,7 @@ class SamplingDaysSelector(DaysSelector):
         bestSelection = None
         tic = time.time()
         print("Random sampling of representative days...")
-        while time.time()-tic < self.timelimit:
+        while time.time() - tic < self.timelimit:
             # Select days
             selectedDays = set()
             while len(selectedDays) < self.numberRepresentativeDays:
@@ -71,7 +73,7 @@ class SamplingDaysSelector(DaysSelector):
         for j in range(len(bins.days)):
             # Find the closest day
             dCandidate = 0
-            candidateDist = len(bins.days)*self.binsPerTimeSeries*len(bins.labels)
+            candidateDist = len(bins.days) * self.binsPerTimeSeries * len(bins.labels)
             for i in range(len(selectedDays)):
                 dDist = self._daysDistance(i, j, pRange, bRange, bins.A)
                 if dDist < candidateDist:
@@ -98,11 +100,11 @@ class SamplingDaysSelector(DaysSelector):
     # @param bRange Range of the bins.
     # @param A Number of periods in each bin of a given day.
     # @return Distance.
-    def _daysDistance(self,d1,d2,pRange,bRange,A):
-        dist=0
+    def _daysDistance(self, d1, d2, pRange, bRange, A):
+        dist = 0
         for p in pRange:
             for b in bRange:
-                dist+=abs(A[p][b][d1]-A[p][b][d2])
+                dist += abs(A[p][b][d1] - A[p][b][d2])
         return dist
 
     ## @var binsPerTimeSeries

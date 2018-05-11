@@ -6,6 +6,7 @@ import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as pyplot
 
+
 ## Class containing the time series data.
 class Data:
     def __init__(self):
@@ -25,7 +26,8 @@ class Data:
     ## Plot a timeseries.
     # @param label Label of the timeseries.
     # @param resolution of the chart in ]0,1[, the smaller the better.
-    def plotTimeseries(self, label, resolution=0.01):
+    # @param pathPrefix Prefix of the output file.
+    def plotTimeseries(self, label, resolution=0.01, pathPrefix=""):
         labelIndex = self.labels.index(label)
 
         # Define the bins
@@ -68,15 +70,16 @@ class Data:
         pyplot.xlabel('Duration [%]')
         pyplot.ylabel('Duration curve values')
         pyplot.title('%s [%s]' % (label.name, label.units))
-        pyplot.savefig(label.name+".pdf")
+        pyplot.savefig(pathPrefix + label.name + ".pdf")
 
         pyplot.close()
 
     ## Plot the original timeseries and the one obtained with the representative days.
     # @param label Label of the timeseries.
     # @param representativeDays List of representative days
-    # @param resolution of the chart in ]0,1[, the smaller the better.
-    def plotRepresentativeTimeseries(self, label, representativeDays, resolution=0.01):
+    # @param resolution Resolution of the chart in ]0,1[, the smaller the better.
+    # @param pathPrefix Prefix of the output file.
+    def plotRepresentativeTimeseries(self, label, representativeDays, resolution=0.01, pathPrefix=""):
         labelIndex = self.labels.index(label)
 
         # Define the bins
@@ -138,7 +141,7 @@ class Data:
         pyplot.ylabel('Duration curve values')
         pyplot.title('%s [%s]' % (label.name, label.units))
         pyplot.legend(['Original', 'Representative days'])
-        pyplot.savefig(label.name+".pdf")
+        pyplot.savefig(pathPrefix + label.name + ".pdf")
 
         pyplot.close()
 
@@ -146,6 +149,7 @@ class Data:
     # List of TimeSeriesLabels.
     ## @var timeSeries
     # Dictionary with the time series taking as key the day and as value a dictionary label index/array of values.
+
 
 ## Time series labels and information.
 class TimeSeriesLabel:
