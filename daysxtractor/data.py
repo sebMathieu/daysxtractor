@@ -69,7 +69,10 @@ class Data:
 
         pyplot.xlabel('Duration [%]')
         pyplot.ylabel('Duration curve values')
-        pyplot.title('%s [%s]' % (label.name, label.units))
+        if label.units is not None and label.units != "":
+            pyplot.title('%s [%s]' % (label.name, label.units))
+        else:
+            pyplot.title('%s' % label.name)
         pyplot.savefig(pathPrefix + label.name + ".pdf")
 
         pyplot.close()
@@ -139,7 +142,10 @@ class Data:
 
         pyplot.xlabel('Duration [%]')
         pyplot.ylabel('Duration curve values')
-        pyplot.title('%s [%s]' % (label.name, label.units))
+        if label.units is not None and label.units != "":
+            pyplot.title('%s [%s]' % (label.name, label.units))
+        else:
+            pyplot.title(label.name)
         pyplot.legend(['Original', 'Representative days'])
         pyplot.savefig(pathPrefix + label.name + ".pdf")
 

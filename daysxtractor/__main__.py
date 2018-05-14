@@ -4,7 +4,8 @@
 import sys, time, getopt, datetime, os
 
 from daysxtractor.mipdaysselector import MIPDaysSelector
-import daysxtractor.excelReader as excelReader
+import daysxtractor.excel_interface as excel
+import daysxtractor.csv_interface as csv
 from daysxtractor import SamplingDaysSelector
 from daysxtractor import MinPopBins as Bins
 
@@ -20,6 +21,7 @@ def main(argv):
     plot = False
     check = None  # Path of the file containing the representative days to check
     outputFolder = None
+    parseUnits = False
 
     # Parse parameters
     if len(argv) < 1:
@@ -28,8 +30,8 @@ def main(argv):
     filePath = argv[-1]
 
     try:
-        opts, args = getopt.getopt(argv[0:-1], 'n:s:t:vpc:o:',
-                                   ['number=', 'solver=', 'timelimit=', 'verbose', 'plot', 'check=', 'output='])
+        opts, args = getopt.getopt(argv[0:-1], 'n:s:t:vpc:o:u',
+                                   ['number=', 'solver=', 'timelimit=', 'verbose', 'plot', 'check=', 'output=', 'units'])
     except getopt.GetoptError as err:
         displayHelp()
         sys.exit(2)
@@ -54,6 +56,8 @@ def main(argv):
             check = arg
         elif opt in ('-o', '--output'):
             outputFolder = arg
+        elif opt in ('-u', '--units'):
+            parseUnits = True
 
     if outputFolder is None:
         outputFolder = "."
@@ -61,13 +65,20 @@ def main(argv):
         outputFolder += '/'
 
     # Read the data
-    data = excelReader.parseFile(filePath)
+    ext = filePath[-3:].lower()
+    if ext == "xls":
+        data = excel.parseFile(filePath, parseUnits)
+    elif ext == "csv":
+        data = csv.parseFile(filePath, parseUnits)
+    else:
+        print('Unknown input format "%s" of file "%s".' % (ext, filePath))
+        exit(0)
 
     # Instantiate the day selector
     daySelector = None
     if solver is None:
-        print(
-            "WARNING: No optimization solver set. Try using an optimization solver (e.g. cplex, gurobi, cbc, etc.) for better results.")
+        if check is not None:
+            print("WARNING: No optimization solver set. Try using an optimization solver (e.g. cplex, gurobi, cbc, etc.) for better results.")
         daySelector = SamplingDaysSelector(numberRepresentativeDays=numberRepresentativeDays, timelimit=timelimit,
                                            verbose=verbose)
     else:
@@ -75,16 +86,23 @@ def main(argv):
                                       solverName=solver, verbose=verbose)
 
     # Select days
-    tic = time.time()
     representativeDays = None
     if check is None:
+        tic = time.time()
         representativeDays = daySelector.selectDays(data)
+        toc = time.time()
+        print("\nRepresentative days and weights found after %.2fs:" % (toc - tic))
     else:
-        representativeDays = excelReader.parseRepresentativeDays(check)
-    toc = time.time()
+        check_ext = check[-3:].lower()
+        if check_ext == "xls":
+            representativeDays = excel.parseRepresentativeDays(check)
+        elif check_ext == "csv":
+            representativeDays = csv.parseRepresentativeDays(check)
+        else:
+            print('Unknown input format "%s" of file "%s".' % (check_ext, check))
+            exit(0)
 
     # Print result
-    print("\nRepresentative days and weights found after %.2fs:" % (toc - tic))
     for day in sorted(representativeDays.keys()):
         print("\t%.2f\t-\t%s" % (
         representativeDays[day], day.strftime("%d %B %Y") if isinstance(day, datetime.datetime) else day))
@@ -93,9 +111,16 @@ def main(argv):
     representativeBins = Bins()
     representativeBins.createFromRepresentativeDays(bins, representativeDays)
 
+    # Output
+    if outputFolder is not None:
+        os.makedirs(outputFolder, exist_ok=True)
+        if ext == "xls":
+            excel.writeDays(representativeDays, "%s/days.xls" % outputFolder)
+        else:
+            csv.writeDays(representativeDays, "%s/days.csv" % outputFolder)
+
     # Plot
     if plot:
-        os.makedirs(outputFolder, exist_ok=True)
         for label in data.labels:
             data.plotRepresentativeTimeseries(label, representativeDays, pathPrefix=outputFolder)
 
@@ -118,22 +143,22 @@ def main(argv):
 ## Display help of the program.
 def displayHelp():
     text = ''
-    text += 'Usage :\n\tpython __main__.py [options] data.xlsx\n'
+    text += 'Usage :\n\tpython -m daysxtractor [options] data.xlsx\n'
     text += 'Extract a given number of representative days of a set of time series.\n'
-    text += '\nThe first column of the excel file is the date, the second corresponds to the quarter (which may be empty).\n'
+    text += '\nThe first column of the excel file is the date.\n'
     text += 'Following columns are the different parameters characterizing the parameters.\n'
-    text += 'The first two lines compose the header with the title of each column on the first and the units in the second.\n\n'
 
     text += 'Options:\n'
-    text += '    -n 12       --number 12       Number of representative days to select.\n'
-    text += '    -s name     --solver name     Use an optimization solver (cplex, gurobi, cbc, asl:scip, etc.).\n'
-    text += '    -t 60       --timelimit 60    Set the time limit to 60 seconds.\n'
-    text += '    -v          --verbose         Verbose mode.\n'
-    text += '    -p          --plot            Plot.\n'
-    text += '    -c days.xls --check days.xls  Check selected representative days. The first row of the file is a\n'
+    text += '   -n 12       --number 12       Number of representative days to select.\n'
+    text += '   -s name     --solver name     Use an optimization solver (cplex, gurobi, cbc, asl:scip, etc.).\n'
+    text += '   -t 60       --timelimit 60    Set the time limit to 60 seconds.\n'
+    text += '   -v          --verbose         Verbose mode.\n'
+    text += '   -p          --plot            Plot.\n'
+    text += '   -c days.xls --check days.xls  Check selected representative days. The first row of the file is a\n'
     text += '                                  header. The next lines contains the days in the first column and \n'
     text += '                                  their weights in the second.\n'
-    text += '   -o folder    --output folder   Output the plots in a specific folder.\n'
+    text += '   -u          --units           Specifies that the second row of the excel files contains the units.\n'
+    text += '   -o folder   --output folder   Output the plots in a specific folder.\n'
 
     print(text)
 

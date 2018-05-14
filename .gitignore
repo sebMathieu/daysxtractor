@@ -1,3 +1,6 @@
 archives
 *.pdf
 doc/html
+*.sol
+*.lp
+*.script

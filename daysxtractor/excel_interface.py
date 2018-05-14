@@ -1,18 +1,19 @@
-##@package excelReader
+##@package excel_interface
 #@author Sebastien MATHIEU
 
 import time, datetime
-import xlrd  # Read excel files. Install with "pip install xlrd"
+import xlrd
+import xlwt
 from .data import *
 
 
 ## Parse an excel file with time series.
-# The first column of the file is the date, the second corresponds to the quarter (which may be empty).
+# The first column of the file is the date.
 # Following columns are the different parameters characterizing the parameters.
-# The first two lines compose the header with the title of each column on the first and the units in the second.
 # @param filePath Path to the excel file.
+# @param with_units Boolean, true if the second row contains the units.
 # @return Data with the time series.
-def parseFile(filePath):
+def parseFile(filePath, with_units=False):
     # Open excel
     tic = time.clock()
     data = Data()
@@ -20,9 +21,10 @@ def parseFile(filePath):
     sheet = workbook.sheet_by_index(0)
 
     # Parse header
-    for c in range(2, sheet.ncols):
+    for c in range(1, sheet.ncols):
         label = TimeSeriesLabel(sheet.cell_value(0, c))
-        label.units = sheet.cell_value(1,c)
+        if with_units:
+            label.units = sheet.cell_value(1, c)
         data.labels.append(label)
 
     # Parse content
@@ -58,7 +60,7 @@ def parseFile(filePath):
 
         # Add the data
         for p in data.labelRanges():
-            v = float(row[p+2])
+            v = float(row[p+1])
             dayTimeSeries[p].append(v)
 
             # Update min-max
@@ -82,6 +84,7 @@ def parseFile(filePath):
     print("")
 
     return data
+
 
 ## Parse an excel file with representative days.
 # The first row of the file is a header.
@@ -121,3 +124,21 @@ def parseRepresentativeDays(filePath):
         days[day] = weight
 
     return days
+
+
+## Write representative days into an excel file.
+# @param days Dictionary with the days as keys and their weight as values.
+# @param path Output file path.
+def writeDays(days, path):
+    wb = xlwt.Workbook()
+    ws = wb.add_sheet('days')
+    ws.write(0, 0, "Day")
+    ws.write(0, 1, "Weight")
+    date_style = xlwt.easyxf(num_format_str="dd/mm/yyyy")
+
+    i = 1
+    for d in sorted(days.keys()):
+        ws.write(i, 0, d, date_style)
+        ws.write(i, 1, days[d])
+        i += 1
+    wb.save(path)

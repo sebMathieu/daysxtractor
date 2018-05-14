@@ -1,5 +1,4 @@
 ##@package mipdaysselector
-# Requires pyomo which can be installed with "pip install pyomo".
 # @author Sebastien MATHIEU
 
 from __future__ import division
@@ -13,7 +12,7 @@ from .minpopbins import MinPopBins as Bins
 
 
 ## Selector of days based on a mixed-interger linear optimization problem.
-# The formulation is a slightly modified version of the paper: K. Poncelent, H. Hoschle, E. Delarue, W. D'haeseleer, "Selecting representative days for investment planning models".
+# The formulation is a slightly modified version of the paper: K. Poncelet, H. Hoschle, E. Delarue, W. D'haeseleer, "Selecting representative days for investment planning models".
 class MIPDaysSelector(DaysSelector):
     ## Constructor.
     # @param binsPerTimeSeries Number of bins discretizing the time series.

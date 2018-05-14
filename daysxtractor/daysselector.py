@@ -8,9 +8,6 @@ from abc import ABCMeta, abstractmethod
 class DaysSelector:
     __metaclass__ = ABCMeta
 
-    def __init__(self):
-        pass
-
     ## Select representative days from time series.
     # @param data Data with the time series.
     # @return Dictionary with the select days and their weights.
