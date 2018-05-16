@@ -19,5 +19,7 @@ class TestExcelReader(unittest.TestCase):
         for l in self.data.labels:
             self.assertEqual('%.2f' % l.average, averages[l.name])
 
+
 if __name__ == '__main__':
     unittest.main()
+

@@ -33,7 +33,8 @@ class SamplingDaysSelector(DaysSelector):
         bestObj = None
         bestSelection = None
         tic = time.time()
-        print("Random sampling of representative days...")
+        if self.verbose:
+            print("Random sampling of representative days...")
         while time.time() - tic < self.timelimit:
             # Select days
             selectedDays = set()
@@ -53,7 +54,8 @@ class SamplingDaysSelector(DaysSelector):
             # Iterate
             samples += 1
 
-        print("Best solution found has an objective value of %.2f after %s samples." % (bestObj, samples))
+        if self.verbose:
+            print("Best solution found has an objective value of %.2f after %s samples." % (bestObj, samples))
 
         # Reformat selection
         return {bins.days[d]: v for d, v in bestSelection.items()}

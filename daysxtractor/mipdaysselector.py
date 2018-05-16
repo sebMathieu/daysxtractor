@@ -118,13 +118,15 @@ class MIPDaysSelector(DaysSelector):
 
         # Solve
         self.solver.options[self._timelimitParameter] = self.timeLimit
-        print('Solving the optimization problem using "%s"...' % self.solver.name)
-        self.solver.solve(model, keepfiles=self.verbose, tee=self.verbose)  # tee=True to display the solver output
+        if self.verbose:
+            print('Solving the optimization problem using "%s"...' % self.solver.name)
+        self.solver.solve(model, keepfiles=False, tee=self.verbose)  # tee=True to display the solver output
         if len(model.solutions) == 0:
             raise Exception('No solution found.')
 
         # Load results
-        print("Best solution found has an objective value of %.2f." % value(model.obj))
+        if self.verbose:
+            print("Best solution found has an objective value of %.2f." % value(model.obj))
         selectedDays = {}
         for d in bins.daysRange():
             if model.u[d].value > 0.5:
